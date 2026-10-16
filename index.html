@@ -123,6 +123,8 @@ artworkTexture.offset.set(0.003, 0.003);
 
 const frontMaterial = new THREE.MeshBasicMaterial({
   map: artworkTexture,
+  transparent: true,
+  alphaTest: 0.01,
   toneMapped: false
 });
 
