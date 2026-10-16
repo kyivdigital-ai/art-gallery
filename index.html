@@ -58,7 +58,7 @@
     });
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -100,6 +100,10 @@
 
 artworkTexture.anisotropy =
   renderer.capabilities.getMaxAnisotropy();
+
+artworkTexture.minFilter = THREE.LinearMipmapLinearFilter;
+artworkTexture.magFilter = THREE.LinearFilter;
+artworkTexture.generateMipmaps = true;
 
 artworkTexture.wrapS = THREE.ClampToEdgeWrapping;
 artworkTexture.wrapT = THREE.ClampToEdgeWrapping;
