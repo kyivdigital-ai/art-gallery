@@ -97,8 +97,15 @@
     const textureLoader = new THREE.TextureLoader();
     const artworkTexture = textureLoader.load("./artwork.png");
     artworkTexture.colorSpace = THREE.SRGBColorSpace;
-    artworkTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
+artworkTexture.anisotropy =
+  renderer.capabilities.getMaxAnisotropy();
+
+artworkTexture.wrapS = THREE.ClampToEdgeWrapping;
+artworkTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+artworkTexture.repeat.set(0.994, 0.994);
+artworkTexture.offset.set(0.003, 0.003);
     const edgeMaterial = new THREE.MeshStandardMaterial({
       color: 0x111111,
       roughness: 0.4,
