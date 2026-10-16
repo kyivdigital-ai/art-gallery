@@ -91,7 +91,8 @@
 
     // Source image ratio: 1243 × 1713
     const artworkHeight = 3.2;
-    const artworkWidth = artworkHeight * (1243 / 1713);
+    const artworkHeight = 3.2;
+    const artworkWidth = artworkHeight * (5031 / 7087);
     const depth = 0.16;
 
     const textureLoader = new THREE.TextureLoader();
@@ -101,9 +102,9 @@
 artworkTexture.anisotropy =
   renderer.capabilities.getMaxAnisotropy();
 
-artworkTexture.minFilter = THREE.LinearMipmapLinearFilter;
+artworkTexture.minFilter = THREE.LinearFilter;
 artworkTexture.magFilter = THREE.LinearFilter;
-artworkTexture.generateMipmaps = true;
+artworkTexture.generateMipmaps = false;
 
 artworkTexture.wrapS = THREE.ClampToEdgeWrapping;
 artworkTexture.wrapT = THREE.ClampToEdgeWrapping;
@@ -122,11 +123,10 @@ artworkTexture.offset.set(0.003, 0.003);
       metalness: 0
     });
 
-    const frontMaterial = new THREE.MeshStandardMaterial({
-      map: artworkTexture,
-      roughness: 0.9,
-      metalness: 0
-    });
+const frontMaterial = new THREE.MeshBasicMaterial({
+  map: artworkTexture,
+  toneMapped: false
+});
 
     // BoxGeometry material order: right, left, top, bottom, front, back
     const materials = [
@@ -191,7 +191,7 @@ artworkTexture.offset.set(0.003, 0.003);
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
     }
 
     window.addEventListener("resize", resize);
