@@ -69,7 +69,7 @@
     scene.add(ambient);
 
     const mainLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    mainLight.position.set(4, 5, 6);
+    mainLight.position.set(2, 9, 4);
     mainLight.castShadow = true;
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
@@ -154,12 +154,12 @@ artworkTexture.offset.set(0.003, 0.003);
       new THREE.PlaneGeometry(20, 20),
       new THREE.ShadowMaterial({
         color: 0x000000,
-        opacity: 0.13
+        opacity: 0.09
       })
     );
 
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -(artworkHeight / 2) - 0.65;
+    floor.position.y = -(artworkHeight / 2) - 0.18;
     floor.receiveShadow = true;
     scene.add(floor);
 
