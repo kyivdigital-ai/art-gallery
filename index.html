@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  />
+
   <title>Artwork</title>
 
   <style>
@@ -27,21 +32,30 @@
     #gallery {
       position: fixed;
       inset: 0;
+
       width: 100%;
       height: 100%;
+
       overflow: hidden;
       background: #482A34;
     }
 
+    /* SLIDES */
+
     .slide {
       position: absolute;
       inset: 0;
+
       width: 100%;
       height: 100%;
+
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition: opacity 420ms ease;
+
+      transition:
+        opacity 380ms ease,
+        visibility 380ms ease;
     }
 
     .slide.is-active {
@@ -50,17 +64,22 @@
       pointer-events: auto;
     }
 
+    /* 3D */
+
     #three-stage {
       position: absolute;
       inset: 0;
+
       width: 100%;
       height: 100%;
     }
 
     canvas {
       display: block;
+
       width: 100%;
       height: 100%;
+
       touch-action: none;
       cursor: grab;
     }
@@ -69,373 +88,868 @@
       cursor: grabbing;
     }
 
+    /* CLOSE-UP */
+
     .closeup-slide {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 5vh 8vw;
+
+      padding: 5vh 7vw;
+
       background: #482A34;
+
+      cursor: pointer;
     }
 
     .closeup-slide img {
       display: block;
-      max-width: min(78vw, 980px);
+
+      max-width: min(82vw, 1100px);
       max-height: 90vh;
+
       width: auto;
       height: auto;
+
       object-fit: contain;
+
       user-select: none;
       -webkit-user-drag: none;
+
+      cursor: pointer;
     }
 
-    .gallery-arrow {
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 9999;
+    /* COUNTER */
 
-  width: 28px;
-  height: 40px;
+    .gallery-counter {
+      position: fixed;
 
-  padding: 0;
-  border: 0;
-  background: transparent;
+      left: 50%;
+      bottom: 12px;
 
-  color: #ECCDD9;
+      transform: translateX(-50%);
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+      z-index: 9999;
 
-  cursor: pointer;
-  pointer-events: auto;
-  -webkit-tap-highlight-color: transparent;
-}
+      color: #ECCDD9;
 
-.gallery-arrow--prev {
-  left: 10px;
-}
+      font-family: "Courier New", Courier, monospace;
+      font-size: 8px;
 
-.gallery-arrow--next {
-  right: 10px;
-}
+      letter-spacing: 0.08em;
 
-.gallery-arrow svg {
-  width: 12px;
-  height: 24px;
+      pointer-events: none;
 
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.2;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
-}
-
-.gallery-arrow:hover svg {
-  opacity: 0.6;
-}
-
-#gallery {
-  z-index: 0;
-}
+      opacity: 0.75;
+    }
 
     @media (max-width: 700px) {
-      .gallery-arrow {
-        width: 40px;
-        height: 64px;
-      }
-
-      .gallery-arrow--prev {
-        left: 6px;
-      }
-
-      .gallery-arrow--next {
-        right: 6px;
-      }
-
-      .gallery-arrow svg {
-        width: 20px;
-        height: 42px;
-      }
-
       .closeup-slide {
-        padding: 5vh 12vw;
+        padding: 4vh 10vw;
       }
 
       .closeup-slide img {
-        max-width: 84vw;
+        max-width: 88vw;
         max-height: 88vh;
       }
     }
   </style>
 </head>
+
 <body>
+
   <main id="gallery">
-    <section class="slide is-active" data-slide="0" aria-hidden="false">
+
+    <!-- SLIDE 1 -->
+    <section
+      class="slide is-active"
+      data-slide="0"
+      aria-hidden="false"
+    >
       <div id="three-stage"></div>
     </section>
 
-    <section class="slide closeup-slide" data-slide="1" aria-hidden="true">
-      <img src="./closeup.jpg" alt="Close-up detail of the artwork" />
+
+    <!-- SLIDE 2 -->
+    <section
+      class="slide closeup-slide"
+      data-slide="1"
+      aria-hidden="true"
+      id="closeup-slide"
+    >
+      <img
+        src="./closeup.jpg"
+        alt="Close-up detail of the artwork"
+        draggable="false"
+      />
     </section>
+
   </main>
 
-  <button class="gallery-arrow gallery-arrow--prev" id="prev" type="button" aria-label="Previous image">
-    <svg viewBox="0 0 24 48" aria-hidden="true">
-      <path d="M18 4L6 24L18 44" />
-    </svg>
-  </button>
 
-  <button class="gallery-arrow gallery-arrow--next" id="next" type="button" aria-label="Next image">
-    <svg viewBox="0 0 24 48" aria-hidden="true">
-      <path d="M6 4L18 24L6 44" />
-    </svg>
-  </button>
+  <div
+    class="gallery-counter"
+    id="counter"
+  >
+    01 / 02
+  </div>
+
 
   <script type="module">
-    import * as THREE from "https://esm.sh/three@0.160.0";
 
-    // --------------------------------------------------
-    // SLIDESHOW
-    // --------------------------------------------------
+    import * as THREE
+      from "https://esm.sh/three@0.160.0";
 
-    const slides = [...document.querySelectorAll(".slide")];
-    const prevButton = document.getElementById("prev");
-    const nextButton = document.getElementById("next");
+
+    /* ==================================================
+       SLIDESHOW
+    ================================================== */
+
+    const slides =
+      [...document.querySelectorAll(".slide")];
+
+    const closeupSlide =
+      document.getElementById("closeup-slide");
+
+    const counter =
+      document.getElementById("counter");
+
     let currentSlide = 0;
 
+
     function showSlide(index) {
-      currentSlide = (index + slides.length) % slides.length;
+
+      currentSlide =
+        (index + slides.length) % slides.length;
+
 
       slides.forEach((slide, i) => {
-        const active = i === currentSlide;
-        slide.classList.toggle("is-active", active);
-        slide.setAttribute("aria-hidden", String(!active));
-      });
-    }
 
-    prevButton.addEventListener("click", () => showSlide(currentSlide - 1));
-    nextButton.addEventListener("click", () => showSlide(currentSlide + 1));
+        const active =
+          i === currentSlide;
 
-    window.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowLeft") showSlide(currentSlide - 1);
-      if (event.key === "ArrowRight") showSlide(currentSlide + 1);
-    });
-
-    // --------------------------------------------------
-    // THREE.JS — FIRST SLIDE
-    // --------------------------------------------------
-
-    const app = document.getElementById("three-stage");
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x482A34);
-
-    const camera = new THREE.PerspectiveCamera(
-      32,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      100
-    );
-    camera.position.set(0, 0, 9.5);
-
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: false,
-      powerPreference: "high-performance"
-    });
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    app.appendChild(renderer.domElement);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.25);
-    scene.add(ambientLight);
-
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.45);
-    keyLight.position.set(2.5, 8, 5);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(2048, 2048);
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 25;
-    keyLight.shadow.camera.left = -5;
-    keyLight.shadow.camera.right = 5;
-    keyLight.shadow.camera.top = 5;
-    keyLight.shadow.camera.bottom = -5;
-    scene.add(keyLight);
-
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.28);
-    fillLight.position.set(-4, 2, 4);
-    scene.add(fillLight);
-
-    const artworkGroup = new THREE.Group();
-    scene.add(artworkGroup);
-
-    const visibleAspect = 1406 / 1939;
-    const artworkHeight = 2.6;
-    const artworkWidth = artworkHeight * visibleAspect;
-    const depth = 0.13;
-
-    const bodyMaterial = new THREE.MeshStandardMaterial({
-      color: 0x101010,
-      roughness: 0.92,
-      metalness: 0.0
-    });
-
-    const body = new THREE.Mesh(
-      new THREE.BoxGeometry(artworkWidth, artworkHeight, depth),
-      bodyMaterial
-    );
-    body.castShadow = true;
-    body.receiveShadow = true;
-    artworkGroup.add(body);
-
-    const textureLoader = new THREE.TextureLoader();
-
-    textureLoader.load(
-      "./artwork-v2.png",
-      (texture) => {
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-
-        // Crop transparent margins from the supplied web image.
-        const sourceW = 1453;
-        const sourceH = 2048;
-        const left = 23;
-        const top = 58;
-        const right = 1429;
-        const bottom = 1997;
-
-        const cropW = right - left;
-        const cropH = bottom - top;
-
-        texture.repeat.set(cropW / sourceW, cropH / sourceH);
-        texture.offset.set(left / sourceW, (sourceH - bottom) / sourceH);
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        texture.generateMipmaps = false;
-        texture.needsUpdate = true;
-
-        const frontMaterial = new THREE.MeshBasicMaterial({
-          map: texture,
-          transparent: true,
-          alphaTest: 0.001,
-          toneMapped: false,
-          side: THREE.FrontSide
-        });
-
-        const front = new THREE.Mesh(
-          new THREE.PlaneGeometry(artworkWidth, artworkHeight),
-          frontMaterial
+        slide.classList.toggle(
+          "is-active",
+          active
         );
 
-        front.position.z = depth / 2 + 0.002;
-        artworkGroup.add(front);
+        slide.setAttribute(
+          "aria-hidden",
+          String(!active)
+        );
+
+      });
+
+
+      counter.textContent =
+        `${String(currentSlide + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+
+    }
+
+
+    /* CLICK CLOSE-UP → RETURN TO 3D */
+
+    closeupSlide.addEventListener(
+      "click",
+      () => {
+        showSlide(0);
+      }
+    );
+
+
+    /* ==================================================
+       THREE.JS
+    ================================================== */
+
+    const app =
+      document.getElementById("three-stage");
+
+
+    const scene =
+      new THREE.Scene();
+
+    scene.background =
+      new THREE.Color(0x482A34);
+
+
+    /* CAMERA */
+
+    const camera =
+      new THREE.PerspectiveCamera(
+        32,
+        1,
+        0.1,
+        100
+      );
+
+    camera.position.set(
+      0,
+      0,
+      9.5
+    );
+
+
+    /* RENDERER */
+
+    const renderer =
+      new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false,
+        powerPreference: "high-performance"
+      });
+
+
+    renderer.outputColorSpace =
+      THREE.SRGBColorSpace;
+
+    renderer.shadowMap.enabled =
+      true;
+
+    renderer.shadowMap.type =
+      THREE.PCFSoftShadowMap;
+
+
+    app.appendChild(
+      renderer.domElement
+    );
+
+
+    /* ==================================================
+       LIGHT
+    ================================================== */
+
+    const ambientLight =
+      new THREE.AmbientLight(
+        0xffffff,
+        1.25
+      );
+
+    scene.add(
+      ambientLight
+    );
+
+
+    const keyLight =
+      new THREE.DirectionalLight(
+        0xffffff,
+        1.45
+      );
+
+
+    keyLight.position.set(
+      2.5,
+      8,
+      5
+    );
+
+
+    keyLight.castShadow =
+      true;
+
+
+    keyLight.shadow.mapSize.set(
+      2048,
+      2048
+    );
+
+
+    keyLight.shadow.camera.near =
+      0.5;
+
+    keyLight.shadow.camera.far =
+      25;
+
+    keyLight.shadow.camera.left =
+      -5;
+
+    keyLight.shadow.camera.right =
+      5;
+
+    keyLight.shadow.camera.top =
+      5;
+
+    keyLight.shadow.camera.bottom =
+      -5;
+
+
+    scene.add(
+      keyLight
+    );
+
+
+    const fillLight =
+      new THREE.DirectionalLight(
+        0xffffff,
+        0.28
+      );
+
+
+    fillLight.position.set(
+      -4,
+      2,
+      4
+    );
+
+
+    scene.add(
+      fillLight
+    );
+
+
+    /* ==================================================
+       ARTWORK
+    ================================================== */
+
+    const artworkGroup =
+      new THREE.Group();
+
+
+    scene.add(
+      artworkGroup
+    );
+
+
+    const visibleAspect =
+      1406 / 1939;
+
+
+    const artworkHeight =
+      2.6;
+
+
+    const artworkWidth =
+      artworkHeight * visibleAspect;
+
+
+    const depth =
+      0.13;
+
+
+    /* BLACK 3D BODY */
+
+    const bodyMaterial =
+      new THREE.MeshStandardMaterial({
+
+        color: 0x101010,
+
+        roughness: 0.92,
+
+        metalness: 0.0
+
+      });
+
+
+    const body =
+      new THREE.Mesh(
+
+        new THREE.BoxGeometry(
+          artworkWidth,
+          artworkHeight,
+          depth
+        ),
+
+        bodyMaterial
+
+      );
+
+
+    body.castShadow =
+      true;
+
+    body.receiveShadow =
+      true;
+
+
+    artworkGroup.add(
+      body
+    );
+
+
+    /* ==================================================
+       FRONT ARTWORK
+    ================================================== */
+
+    const textureLoader =
+      new THREE.TextureLoader();
+
+
+    textureLoader.load(
+
+      "./artwork-v2.png",
+
+      (texture) => {
+
+        texture.colorSpace =
+          THREE.SRGBColorSpace;
+
+
+        texture.anisotropy =
+          renderer.capabilities
+            .getMaxAnisotropy();
+
+
+        texture.wrapS =
+          THREE.ClampToEdgeWrapping;
+
+        texture.wrapT =
+          THREE.ClampToEdgeWrapping;
+
+
+        /* crop transparent border */
+
+        texture.repeat.set(
+          0.96765,
+          0.94678
+        );
+
+
+        texture.offset.set(
+          0.01583,
+          0.02490
+        );
+
+
+        texture.minFilter =
+          THREE.LinearFilter;
+
+        texture.magFilter =
+          THREE.LinearFilter;
+
+        texture.generateMipmaps =
+          false;
+
+
+        texture.needsUpdate =
+          true;
+
+
+        const frontMaterial =
+          new THREE.MeshBasicMaterial({
+
+            map: texture,
+
+            transparent: true,
+
+            alphaTest: 0.001,
+
+            toneMapped: false,
+
+            side: THREE.FrontSide
+
+          });
+
+
+        const front =
+          new THREE.Mesh(
+
+            new THREE.PlaneGeometry(
+              artworkWidth,
+              artworkHeight
+            ),
+
+            frontMaterial
+
+          );
+
+
+        front.position.z =
+          depth / 2 + 0.002;
+
+
+        artworkGroup.add(
+          front
+        );
+
       },
+
       undefined,
-      (error) => console.error("Could not load artwork-v2.png", error)
+
+      (error) => {
+
+        console.error(
+          "Could not load artwork-v2.png",
+          error
+        );
+
+      }
+
     );
 
-    let targetRotationY = -0.16;
-    let targetRotationX = -0.015;
-    let currentRotationY = targetRotationY;
-    let currentRotationX = targetRotationX;
 
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(14, 14),
-      new THREE.ShadowMaterial({
-        color: 0x000000,
-        opacity: 0.12
-      })
+    /* ==================================================
+       ROTATION
+    ================================================== */
+
+    let targetRotationY =
+      -0.16;
+
+    let targetRotationX =
+      -0.015;
+
+
+    let currentRotationY =
+      targetRotationY;
+
+    let currentRotationX =
+      targetRotationX;
+
+
+    /* ==================================================
+       SHADOW
+    ================================================== */
+
+    const floor =
+      new THREE.Mesh(
+
+        new THREE.PlaneGeometry(
+          14,
+          14
+        ),
+
+        new THREE.ShadowMaterial({
+
+          color: 0x000000,
+
+          opacity: 0.12
+
+        })
+
+      );
+
+
+    floor.rotation.x =
+      -Math.PI / 2;
+
+
+    floor.position.y =
+      -(artworkHeight / 2) - 0.11;
+
+
+    floor.receiveShadow =
+      true;
+
+
+    scene.add(
+      floor
     );
 
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -(artworkHeight / 2) - 0.11;
-    floor.receiveShadow = true;
-    scene.add(floor);
 
-    let dragging = false;
-    let lastX = 0;
-    let lastY = 0;
+    /* ==================================================
+       DRAG + CLICK
+    ================================================== */
 
-    renderer.domElement.addEventListener("pointerdown", (event) => {
-      dragging = true;
-      lastX = event.clientX;
-      lastY = event.clientY;
-      renderer.domElement.setPointerCapture(event.pointerId);
-    });
+    let dragging =
+      false;
 
-    renderer.domElement.addEventListener("pointermove", (event) => {
-      if (!dragging) return;
+    let moved =
+      false;
 
-      const dx = event.clientX - lastX;
-      const dy = event.clientY - lastY;
 
-      lastX = event.clientX;
-      lastY = event.clientY;
+    let startX =
+      0;
 
-      targetRotationY += dx * 0.006;
-      targetRotationX += dy * 0.0045;
+    let startY =
+      0;
 
-      targetRotationY = THREE.MathUtils.clamp(targetRotationY, -0.58, 0.58);
-      targetRotationX = THREE.MathUtils.clamp(targetRotationX, -0.18, 0.18);
-    });
+
+    let lastX =
+      0;
+
+    let lastY =
+      0;
+
+
+    renderer.domElement.addEventListener(
+      "pointerdown",
+      (event) => {
+
+        dragging =
+          true;
+
+        moved =
+          false;
+
+
+        startX =
+          event.clientX;
+
+        startY =
+          event.clientY;
+
+
+        lastX =
+          event.clientX;
+
+        lastY =
+          event.clientY;
+
+
+        renderer.domElement
+          .setPointerCapture(
+            event.pointerId
+          );
+
+      }
+    );
+
+
+    renderer.domElement.addEventListener(
+      "pointermove",
+      (event) => {
+
+        if (!dragging) return;
+
+
+        const dx =
+          event.clientX - lastX;
+
+        const dy =
+          event.clientY - lastY;
+
+
+        if (
+          Math.abs(
+            event.clientX - startX
+          ) > 6 ||
+
+          Math.abs(
+            event.clientY - startY
+          ) > 6
+        ) {
+
+          moved =
+            true;
+
+        }
+
+
+        lastX =
+          event.clientX;
+
+        lastY =
+          event.clientY;
+
+
+        targetRotationY +=
+          dx * 0.006;
+
+
+        targetRotationX +=
+          dy * 0.0045;
+
+
+        targetRotationY =
+          THREE.MathUtils.clamp(
+            targetRotationY,
+            -0.58,
+            0.58
+          );
+
+
+        targetRotationX =
+          THREE.MathUtils.clamp(
+            targetRotationX,
+            -0.18,
+            0.18
+          );
+
+      }
+    );
+
 
     function stopDrag(event) {
-      dragging = false;
+
+      if (!dragging) return;
+
+
+      dragging =
+        false;
+
+
       if (
-        event?.pointerId !== undefined &&
-        renderer.domElement.hasPointerCapture(event.pointerId)
+        event &&
+        event.pointerId !== undefined &&
+        renderer.domElement.hasPointerCapture(
+          event.pointerId
+        )
       ) {
-        renderer.domElement.releasePointerCapture(event.pointerId);
+
+        renderer.domElement
+          .releasePointerCapture(
+            event.pointerId
+          );
+
       }
+
+
+      /*
+        If it was a click,
+        not a drag:
+        show close-up.
+      */
+
+      if (!moved) {
+
+        showSlide(1);
+
+      }
+
     }
 
-    renderer.domElement.addEventListener("pointerup", stopDrag);
-    renderer.domElement.addEventListener("pointercancel", stopDrag);
-    renderer.domElement.addEventListener("pointerleave", () => {
-      dragging = false;
-    });
+
+    renderer.domElement.addEventListener(
+      "pointerup",
+      stopDrag
+    );
+
+
+    renderer.domElement.addEventListener(
+      "pointercancel",
+      (event) => {
+
+        dragging =
+          false;
+
+
+        if (
+          event.pointerId !== undefined &&
+          renderer.domElement.hasPointerCapture(
+            event.pointerId
+          )
+        ) {
+
+          renderer.domElement
+            .releasePointerCapture(
+              event.pointerId
+            );
+
+        }
+
+      }
+    );
+
+
+    /* ==================================================
+       ANIMATION
+    ================================================== */
 
     function animate() {
-      requestAnimationFrame(animate);
 
-      currentRotationY += (targetRotationY - currentRotationY) * 0.09;
-      currentRotationX += (targetRotationX - currentRotationX) * 0.09;
+      requestAnimationFrame(
+        animate
+      );
 
-      artworkGroup.rotation.y = currentRotationY;
-      artworkGroup.rotation.x = currentRotationX;
 
-      renderer.render(scene, camera);
+      currentRotationY +=
+        (
+          targetRotationY -
+          currentRotationY
+        ) * 0.09;
+
+
+      currentRotationX +=
+        (
+          targetRotationX -
+          currentRotationX
+        ) * 0.09;
+
+
+      artworkGroup.rotation.y =
+        currentRotationY;
+
+
+      artworkGroup.rotation.x =
+        currentRotationX;
+
+
+      renderer.render(
+        scene,
+        camera
+      );
+
     }
+
 
     animate();
 
-    function resize() {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
 
-      camera.aspect = w / h;
+    /* ==================================================
+       RESPONSIVE
+    ================================================== */
+
+    function resize() {
+
+      const w =
+        Math.max(
+          1,
+          app.clientWidth
+        );
+
+
+      const h =
+        Math.max(
+          1,
+          app.clientHeight
+        );
+
+
+      camera.aspect =
+        w / h;
+
+
       camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
+
+
+      renderer.setSize(
+        w,
+        h,
+        false
+      );
+
+
+      renderer.setPixelRatio(
+        Math.min(
+          window.devicePixelRatio,
+          3
+        )
+      );
+
 
       if (w < 700) {
-        artworkGroup.scale.setScalar(0.84);
-        camera.position.z = 6.9;
+
+        artworkGroup.scale.setScalar(
+          0.84
+        );
+
+        camera.position.z =
+          7.4;
+
       } else {
-        artworkGroup.scale.setScalar(1);
-        camera.position.z = 6.6;
+
+        artworkGroup.scale.setScalar(
+          1
+        );
+
+        camera.position.z =
+          7.5;
+
       }
+
     }
 
+
     resize();
-    window.addEventListener("resize", resize);
+
+
+    window.addEventListener(
+      "resize",
+      resize
+    );
+
+
+    showSlide(0);
+
   </script>
+
 </body>
 </html>
