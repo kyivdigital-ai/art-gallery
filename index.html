@@ -9,37 +9,59 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
   />
 
-  <title>Artwork</title>
+  <title>ROMASHKA</title>
 
   <style>
+    :root {
+      background: #482A34;
+      color: #ECCDD9;
+      font-family: "Courier New", Courier, monospace;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
     * {
       box-sizing: border-box;
+    }
+
+    html,
+    body,
+    #gallery {
+      width: 100%;
+      height: 100%;
       margin: 0;
-      padding: 0;
     }
 
     html,
     body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
       background: #482A34;
+      overflow: hidden;
+      overscroll-behavior: none;
     }
 
-    #gallery {
+    body {
       position: fixed;
       inset: 0;
+    }
+
+    /* =========================================
+       MAIN GALLERY
+    ========================================= */
+
+    #gallery {
+      position: relative;
 
       width: 100%;
-      height: 100%;
+      height: 100svh;
 
       overflow: hidden;
+
       background: #482A34;
     }
 
-    /* =========================
+    /* =========================================
        SLIDES
-    ========================= */
+    ========================================= */
 
     .slide {
       position: absolute;
@@ -50,55 +72,72 @@
 
       opacity: 0;
       visibility: hidden;
+
       pointer-events: none;
 
       transition:
-        opacity 380ms ease,
-        visibility 380ms ease;
+        opacity 320ms ease,
+        visibility 320ms ease;
     }
 
     .slide.is-active {
       opacity: 1;
       visibility: visible;
+
       pointer-events: auto;
     }
 
-    /* =========================
-       3D ARTWORK
-    ========================= */
+    /* =========================================
+       3D STAGE
+    ========================================= */
 
     #three-stage {
       position: absolute;
       inset: 0;
 
       width: 100%;
-      height: 100%;
+      height: 100svh;
+
+      overflow: hidden;
+
+      background: #482A34;
+
+      touch-action: none;
     }
 
-    canvas {
+    #three-stage canvas {
       display: block;
 
       width: 100%;
       height: 100%;
 
+      outline: none;
+
       touch-action: none;
+
+      -webkit-tap-highlight-color: transparent;
+
       cursor: grab;
     }
 
-    canvas:active {
+    #three-stage canvas:active {
       cursor: grabbing;
     }
 
-    /* =========================
-       CLOSE-UP
-    ========================= */
+    /* =========================================
+       CLOSE UP
+    ========================================= */
 
     .closeup-slide {
       display: flex;
-      align-items: center;
-      justify-content: flex-start;
 
-      padding: 5vh 6vw;
+      align-items: center;
+      justify-content: center;
+
+      width: 100%;
+      height: 100svh;
+
+      padding: 5vh 5vw;
 
       background: #482A34;
 
@@ -108,66 +147,36 @@
     .closeup-slide img {
       display: block;
 
-      max-width: min(50vw, 760px);
-      max-height: 76vh;
-
       width: auto;
       height: auto;
+
+      max-width: 88%;
+      max-height: 86svh;
 
       object-fit: contain;
 
       user-select: none;
+
       -webkit-user-drag: none;
 
       cursor: pointer;
     }
 
-    /* =========================
-       COUNTER
-    ========================= */
-
-    .gallery-counter {
-      position: fixed;
-
-      left: 28%;
-      bottom: 12px;
-
-      transform: translateX(-50%);
-
-      z-index: 9999;
-
-      color: #ECCDD9;
-
-      font-family: "Courier New", Courier, monospace;
-      font-size: 8px;
-
-      letter-spacing: 0.08em;
-
-      pointer-events: none;
-
-      opacity: 0.7;
-    }
-
-    /* =========================
+    /* =========================================
        MOBILE
-    ========================= */
+    ========================================= */
 
     @media (max-width: 700px) {
 
       .closeup-slide {
-        justify-content: center;
-
-        padding: 4vh 5vw;
+        padding:
+          4vh
+          5vw;
       }
 
       .closeup-slide img {
-        max-width: 86vw;
-        max-height: 72vh;
-      }
-
-      .gallery-counter {
-        left: 50%;
-        bottom: 10px;
+        max-width: 92vw;
+        max-height: 78svh;
       }
 
     }
@@ -179,45 +188,40 @@
 
   <main id="gallery">
 
-    <!-- SLIDE 1 — 3D ARTWORK -->
+    <!-- ======================================
+         SLIDE 1 — 3D ARTWORK
+    ======================================= -->
 
     <section
       class="slide is-active"
-      data-slide="0"
+      id="artwork-slide"
       aria-hidden="false"
     >
+
       <div id="three-stage"></div>
+
     </section>
 
 
-    <!-- SLIDE 2 — CLOSE-UP -->
+    <!-- ======================================
+         SLIDE 2 — CLOSE UP
+    ======================================= -->
 
     <section
       class="slide closeup-slide"
-      data-slide="1"
-      aria-hidden="true"
       id="closeup-slide"
+      aria-hidden="true"
     >
 
       <img
         src="./closeup.jpg"
-        alt="Close-up detail of the artwork"
+        alt="Close-up detail of ROMASHKA"
         draggable="false"
       />
 
     </section>
 
   </main>
-
-
-  <!-- COUNTER -->
-
-  <div
-    class="gallery-counter"
-    id="counter"
-  >
-    01 / 02
-  </div>
 
 
   <script type="module">
@@ -227,62 +231,67 @@
 
 
     /* ==================================================
-       SLIDESHOW
+       SLIDES
     ================================================== */
 
-    const slides =
-      [...document.querySelectorAll(".slide")];
+    const artworkSlide =
+      document.getElementById("artwork-slide");
 
     const closeupSlide =
       document.getElementById("closeup-slide");
 
-    const counter =
-      document.getElementById("counter");
 
-    let currentSlide = 0;
+    function showArtwork() {
 
+      artworkSlide.classList.add(
+        "is-active"
+      );
 
-    function showSlide(index) {
-
-      currentSlide =
-        (index + slides.length) % slides.length;
-
-
-      slides.forEach((slide, i) => {
-
-        const active =
-          i === currentSlide;
+      closeupSlide.classList.remove(
+        "is-active"
+      );
 
 
-        slide.classList.toggle(
-          "is-active",
-          active
-        );
+      artworkSlide.setAttribute(
+        "aria-hidden",
+        "false"
+      );
 
-
-        slide.setAttribute(
-          "aria-hidden",
-          String(!active)
-        );
-
-      });
-
-
-      counter.textContent =
-        `${String(currentSlide + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+      closeupSlide.setAttribute(
+        "aria-hidden",
+        "true"
+      );
 
     }
 
 
-    /* CLICK CLOSE-UP → RETURN */
+    function showCloseup() {
+
+      artworkSlide.classList.remove(
+        "is-active"
+      );
+
+      closeupSlide.classList.add(
+        "is-active"
+      );
+
+
+      artworkSlide.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      closeupSlide.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+    }
+
 
     closeupSlide.addEventListener(
       "click",
-      () => {
-
-        showSlide(0);
-
-      }
+      showArtwork
     );
 
 
@@ -290,16 +299,24 @@
        THREE.JS
     ================================================== */
 
-    const app =
-      document.getElementById("three-stage");
+    const stage =
+      document.getElementById(
+        "three-stage"
+      );
 
+
+    /* ==================================================
+       SCENE
+    ================================================== */
 
     const scene =
       new THREE.Scene();
 
 
     scene.background =
-      new THREE.Color(0x482A34);
+      new THREE.Color(
+        0x482A34
+      );
 
 
     /* ==================================================
@@ -308,17 +325,22 @@
 
     const camera =
       new THREE.PerspectiveCamera(
+
         32,
+
         1,
+
         0.1,
+
         100
+
       );
 
 
     camera.position.set(
       0,
       0,
-      9.2
+      7
     );
 
 
@@ -351,19 +373,32 @@
       THREE.PCFSoftShadowMap;
 
 
-    app.appendChild(
+    renderer.setPixelRatio(
+
+      Math.min(
+        window.devicePixelRatio,
+        2
+      )
+
+    );
+
+
+    stage.appendChild(
       renderer.domElement
     );
 
 
     /* ==================================================
-       LIGHTS
+       LIGHTING
     ================================================== */
 
     const ambientLight =
       new THREE.AmbientLight(
+
         0xffffff,
-        1.25
+
+        1.2
+
       );
 
 
@@ -374,14 +409,17 @@
 
     const keyLight =
       new THREE.DirectionalLight(
+
         0xffffff,
-        1.45
+
+        1.35
+
       );
 
 
     keyLight.position.set(
       2.5,
-      8,
+      7,
       5
     );
 
@@ -427,8 +465,11 @@
 
     const fillLight =
       new THREE.DirectionalLight(
+
         0xffffff,
-        0.28
+
+        0.25
+
       );
 
 
@@ -445,7 +486,7 @@
 
 
     /* ==================================================
-       ARTWORK GROUP
+       ARTWORK OBJECT
     ================================================== */
 
     const artworkGroup =
@@ -458,7 +499,7 @@
 
 
     /*
-      Visible ratio of framed artwork
+      Visible framed artwork ratio.
     */
 
     const visibleAspect =
@@ -466,15 +507,19 @@
 
 
     /*
-      Smaller than before
+      Physical Three.js size.
+
+      Camera automatically changes distance,
+      so don't keep changing this for mobile.
     */
 
     const artworkHeight =
-      2.05;
+      2.8;
 
 
     const artworkWidth =
-      artworkHeight * visibleAspect;
+      artworkHeight *
+      visibleAspect;
 
 
     const depth =
@@ -482,33 +527,40 @@
 
 
     /* ==================================================
-       3D BODY
+       FRAME / BODY
     ================================================== */
 
     const bodyMaterial =
       new THREE.MeshStandardMaterial({
 
-        color: 0x101010,
+        color:
+          0x101010,
 
-        roughness: 0.92,
+        roughness:
+          0.95,
 
-        metalness: 0
+        metalness:
+          0
 
       });
+
+
+    const bodyGeometry =
+      new THREE.BoxGeometry(
+
+        artworkWidth,
+
+        artworkHeight,
+
+        depth
+
+      );
 
 
     const body =
       new THREE.Mesh(
 
-        new THREE.BoxGeometry(
-
-          artworkWidth,
-
-          artworkHeight,
-
-          depth
-
-        ),
+        bodyGeometry,
 
         bodyMaterial
 
@@ -529,7 +581,7 @@
 
 
     /* ==================================================
-       FRONT TEXTURE
+       FRONT IMAGE
     ================================================== */
 
     const textureLoader =
@@ -539,6 +591,7 @@
     textureLoader.load(
 
       "./artwork-v2.png",
+
 
       (texture) => {
 
@@ -560,18 +613,28 @@
 
 
         /*
-          Crop transparent outer area
+          Crop transparent margins.
+
+          These are percentages,
+          so they also work with
+          your high-resolution file.
         */
 
         texture.repeat.set(
+
           0.96765,
+
           0.94678
+
         );
 
 
         texture.offset.set(
+
           0.01583,
+
           0.02490
+
         );
 
 
@@ -591,32 +654,47 @@
           true;
 
 
+        /*
+          Basic material means
+          the artwork itself is not
+          darkened by the 3D lighting.
+        */
+
         const frontMaterial =
           new THREE.MeshBasicMaterial({
 
-            map: texture,
+            map:
+              texture,
 
-            transparent: true,
+            transparent:
+              true,
 
-            alphaTest: 0.001,
+            alphaTest:
+              0.001,
 
-            toneMapped: false,
+            toneMapped:
+              false,
 
-            side: THREE.FrontSide
+            side:
+              THREE.FrontSide
 
           });
+
+
+        const frontGeometry =
+          new THREE.PlaneGeometry(
+
+            artworkWidth,
+
+            artworkHeight
+
+          );
 
 
         const front =
           new THREE.Mesh(
 
-            new THREE.PlaneGeometry(
-
-              artworkWidth,
-
-              artworkHeight
-
-            ),
+            frontGeometry,
 
             frontMaterial
 
@@ -624,7 +702,8 @@
 
 
         front.position.z =
-          depth / 2 + 0.002;
+          depth / 2 +
+          0.002;
 
 
         artworkGroup.add(
@@ -654,11 +733,11 @@
     ================================================== */
 
     let targetRotationY =
-      -0.14;
+      -0.12;
 
 
     let targetRotationX =
-      -0.012;
+      -0.01;
 
 
     let currentRotationY =
@@ -670,22 +749,24 @@
 
 
     /* ==================================================
-       SHADOW
+       SHORT SHADOW
     ================================================== */
 
     const floor =
       new THREE.Mesh(
 
         new THREE.PlaneGeometry(
-          14,
-          14
+          12,
+          12
         ),
 
         new THREE.ShadowMaterial({
 
-          color: 0x000000,
+          color:
+            0x000000,
 
-          opacity: 0.10
+          opacity:
+            0.10
 
         })
 
@@ -697,7 +778,8 @@
 
 
     floor.position.y =
-      -(artworkHeight / 2) - 0.10;
+      -artworkHeight / 2 -
+      0.10;
 
 
     floor.receiveShadow =
@@ -737,124 +819,151 @@
       0;
 
 
-    renderer.domElement.addEventListener(
-      "pointerdown",
-      (event) => {
+    renderer.domElement
+      .addEventListener(
 
-        dragging =
-          true;
+        "pointerdown",
 
+        (event) => {
 
-        moved =
-          false;
+          dragging =
+            true;
 
-
-        startX =
-          event.clientX;
-
-
-        startY =
-          event.clientY;
-
-
-        lastX =
-          event.clientX;
-
-
-        lastY =
-          event.clientY;
-
-
-        renderer.domElement
-          .setPointerCapture(
-            event.pointerId
-          );
-
-      }
-    );
-
-
-    renderer.domElement.addEventListener(
-      "pointermove",
-      (event) => {
-
-        if (!dragging) return;
-
-
-        const dx =
-          event.clientX - lastX;
-
-
-        const dy =
-          event.clientY - lastY;
-
-
-        if (
-
-          Math.abs(
-            event.clientX - startX
-          ) > 6
-
-          ||
-
-          Math.abs(
-            event.clientY - startY
-          ) > 6
-
-        ) {
 
           moved =
-            true;
+            false;
+
+
+          startX =
+            event.clientX;
+
+
+          startY =
+            event.clientY;
+
+
+          lastX =
+            event.clientX;
+
+
+          lastY =
+            event.clientY;
+
+
+          renderer.domElement
+            .setPointerCapture(
+              event.pointerId
+            );
 
         }
 
-
-        lastX =
-          event.clientX;
+      );
 
 
-        lastY =
-          event.clientY;
+    renderer.domElement
+      .addEventListener(
+
+        "pointermove",
+
+        (event) => {
+
+          if (!dragging) {
+            return;
+          }
 
 
-        targetRotationY +=
-          dx * 0.006;
+          const dx =
+            event.clientX -
+            lastX;
 
 
-        targetRotationX +=
-          dy * 0.0045;
+          const dy =
+            event.clientY -
+            lastY;
 
 
-        targetRotationY =
-          THREE.MathUtils.clamp(
+          /*
+            Distinguish drag from click.
+          */
 
-            targetRotationY,
+          if (
 
-            -0.55,
+            Math.abs(
+              event.clientX -
+              startX
+            ) > 6
 
-            0.55
+            ||
 
-          );
+            Math.abs(
+              event.clientY -
+              startY
+            ) > 6
+
+          ) {
+
+            moved =
+              true;
+
+          }
 
 
-        targetRotationX =
-          THREE.MathUtils.clamp(
+          lastX =
+            event.clientX;
 
-            targetRotationX,
 
-            -0.16,
+          lastY =
+            event.clientY;
 
-            0.16
 
-          );
+          targetRotationY +=
+            dx * 0.006;
 
+
+          targetRotationX +=
+            dy * 0.004;
+
+
+          /*
+            Never allow the back
+            of the artwork to appear.
+          */
+
+          targetRotationY =
+            THREE.MathUtils.clamp(
+
+              targetRotationY,
+
+              -0.52,
+
+              0.52
+
+            );
+
+
+          targetRotationX =
+            THREE.MathUtils.clamp(
+
+              targetRotationX,
+
+              -0.16,
+
+              0.16
+
+            );
+
+        }
+
+      );
+
+
+    function finishPointer(
+      event
+    ) {
+
+      if (!dragging) {
+        return;
       }
-    );
-
-
-    function stopDrag(event) {
-
-      if (!dragging) return;
 
 
       dragging =
@@ -863,9 +972,10 @@
 
       if (
 
-        event &&
+        event.pointerId !==
+        undefined
 
-        event.pointerId !== undefined &&
+        &&
 
         renderer.domElement
           .hasPointerCapture(
@@ -883,33 +993,255 @@
 
 
       /*
-        CLICK, not drag
-        → open close-up
+        Click without drag
+        opens the close-up.
       */
 
       if (!moved) {
 
-        showSlide(1);
+        showCloseup();
 
       }
 
     }
 
 
-    renderer.domElement.addEventListener(
-      "pointerup",
-      stopDrag
-    );
+    renderer.domElement
+      .addEventListener(
+
+        "pointerup",
+
+        finishPointer
+
+      );
 
 
-    renderer.domElement.addEventListener(
-      "pointercancel",
-      () => {
+    renderer.domElement
+      .addEventListener(
 
-        dragging =
-          false;
+        "pointercancel",
 
-      }
+        () => {
+
+          dragging =
+            false;
+
+        }
+
+      );
+
+
+    /* ==================================================
+       RESPONSIVE AUTO-FIT
+    ================================================== */
+
+    function resize() {
+
+      const width =
+        Math.max(
+          1,
+          stage.clientWidth
+        );
+
+
+      const height =
+        Math.max(
+          1,
+          stage.clientHeight
+        );
+
+
+      const aspect =
+        width /
+        height;
+
+
+      camera.aspect =
+        aspect;
+
+
+      camera.updateProjectionMatrix();
+
+
+      renderer.setSize(
+
+        width,
+
+        height,
+
+        false
+
+      );
+
+
+      renderer.setPixelRatio(
+
+        Math.min(
+
+          window.devicePixelRatio,
+
+          2
+
+        )
+
+      );
+
+
+      /*
+        The artwork should use roughly
+        72% of screen height on desktop
+        and 66% on narrow screens.
+      */
+
+      const narrow =
+        width < 700;
+
+
+      const desiredHeightFraction =
+        narrow
+          ? 0.66
+          : 0.72;
+
+
+      const desiredWidthFraction =
+        narrow
+          ? 0.84
+          : 0.82;
+
+
+      /*
+        Extra safety space for rotation
+        and frame depth.
+      */
+
+      const safeHeight =
+        artworkHeight *
+        1.14;
+
+
+      const safeWidth =
+        artworkWidth *
+        1.20;
+
+
+      const verticalFov =
+        THREE.MathUtils
+          .degToRad(
+            camera.fov
+          );
+
+
+      /*
+        Distance required by height.
+      */
+
+      const distanceByHeight =
+
+        (
+          safeHeight /
+          desiredHeightFraction
+        )
+
+        /
+
+        (
+          2 *
+          Math.tan(
+            verticalFov / 2
+          )
+        );
+
+
+      /*
+        Distance required by width.
+      */
+
+      const horizontalFov =
+
+        2 *
+
+        Math.atan(
+
+          Math.tan(
+            verticalFov / 2
+          )
+
+          *
+
+          aspect
+
+        );
+
+
+      const distanceByWidth =
+
+        (
+          safeWidth /
+          desiredWidthFraction
+        )
+
+        /
+
+        (
+          2 *
+          Math.tan(
+            horizontalFov / 2
+          )
+        );
+
+
+      /*
+        Use whichever needs more space.
+        This prevents cropping.
+      */
+
+      const cameraDistance =
+        Math.max(
+
+          distanceByHeight,
+
+          distanceByWidth
+
+        );
+
+
+      camera.position.set(
+
+        0,
+
+        0,
+
+        cameraDistance
+
+      );
+
+
+      /*
+        Always center inside iframe.
+
+        Readymag decides whether this
+        iframe itself is left/right.
+      */
+
+      artworkGroup.position.set(
+
+        0,
+
+        0,
+
+        0
+
+      );
+
+    }
+
+
+    resize();
+
+
+    window.addEventListener(
+      "resize",
+      resize
     );
 
 
@@ -925,17 +1257,27 @@
 
 
       currentRotationY +=
+
         (
           targetRotationY -
           currentRotationY
-        ) * 0.09;
+        )
+
+        *
+
+        0.09;
 
 
       currentRotationX +=
+
         (
           targetRotationX -
           currentRotationX
-        ) * 0.09;
+        )
+
+        *
+
+        0.09;
 
 
       artworkGroup.rotation.y =
@@ -947,8 +1289,11 @@
 
 
       renderer.render(
+
         scene,
+
         camera
+
       );
 
     }
@@ -957,129 +1302,10 @@
     animate();
 
 
-    /* ==================================================
-       RESPONSIVE
-    ================================================== */
-
-    function resize() {
-
-      const w =
-        Math.max(
-          1,
-          app.clientWidth
-        );
-
-
-      const h =
-        Math.max(
-          1,
-          app.clientHeight
-        );
-
-
-      camera.aspect =
-        w / h;
-
-
-      camera.updateProjectionMatrix();
-
-
-      renderer.setSize(
-        w,
-        h,
-        false
-      );
-
-
-      renderer.setPixelRatio(
-
-        Math.min(
-          window.devicePixelRatio,
-          2
-        )
-
-      );
-
-
-      const mobile =
-        w < 700;
-
-
-      if (mobile) {
-
-        /*
-          MOBILE:
-          smaller + centered
-        */
-
-        camera.position.set(
-          0,
-          0,
-          8.8
-        );
-
-
-        artworkGroup.scale.setScalar(
-          0.88
-        );
-
-
-        artworkGroup.position.set(
-          0,
-          0.08,
-          0
-        );
-
-
-        counter.style.left =
-          "50%";
-
-      } else {
-
-        /*
-          DESKTOP:
-          smaller + moved left
-        */
-
-        camera.position.set(
-          0,
-          0,
-          9.2
-        );
-
-
-        artworkGroup.scale.setScalar(
-          1
-        );
-
-
-        artworkGroup.position.set(
-          -1.55,
-          0.10,
-          0
-        );
-
-
-        counter.style.left =
-          "28%";
-
-      }
-
-    }
-
-
-    resize();
-
-
-    window.addEventListener(
-      "resize",
-      resize
-    );
-
-
-    showSlide(0);
+    showArtwork();
 
   </script>
 
 </body>
+
 </html>
