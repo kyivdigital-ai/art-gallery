@@ -25,22 +25,18 @@
       background: #482A34;
     }
 
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
     #gallery {
       position: fixed;
       inset: 0;
-
       width: 100%;
       height: 100%;
-
       overflow: hidden;
       background: #482A34;
     }
 
-    /* SLIDES */
+    /* =========================
+       SLIDES
+    ========================= */
 
     .slide {
       position: absolute;
@@ -64,7 +60,9 @@
       pointer-events: auto;
     }
 
-    /* 3D */
+    /* =========================
+       3D
+    ========================= */
 
     #three-stage {
       position: absolute;
@@ -88,14 +86,18 @@
       cursor: grabbing;
     }
 
-    /* CLOSE-UP */
+    /* =========================
+       CLOSE-UP
+    ========================= */
 
     .closeup-slide {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
 
-      padding: 5vh 7vw;
+      padding:
+        5vh
+        5vw;
 
       background: #482A34;
 
@@ -105,8 +107,8 @@
     .closeup-slide img {
       display: block;
 
-      max-width: min(82vw, 1100px);
-      max-height: 90vh;
+      max-width: min(58vw, 900px);
+      max-height: 86vh;
 
       width: auto;
       height: auto;
@@ -119,12 +121,14 @@
       cursor: pointer;
     }
 
-    /* COUNTER */
+    /* =========================
+       COUNTER
+    ========================= */
 
     .gallery-counter {
       position: fixed;
 
-      left: 50%;
+      left: 30%;
       bottom: 12px;
 
       transform: translateX(-50%);
@@ -140,17 +144,31 @@
 
       pointer-events: none;
 
-      opacity: 0.75;
+      opacity: 0.7;
     }
 
+    /* =========================
+       PHONE / NARROW BLOCK
+    ========================= */
+
     @media (max-width: 700px) {
+
       .closeup-slide {
-        padding: 4vh 10vw;
+        justify-content: center;
+
+        padding:
+          4vh
+          5vw;
       }
 
       .closeup-slide img {
-        max-width: 88vw;
-        max-height: 88vh;
+        max-width: 92vw;
+        max-height: 84vh;
+      }
+
+      .gallery-counter {
+        left: 50%;
+        bottom: 10px;
       }
     }
   </style>
@@ -160,7 +178,7 @@
 
   <main id="gallery">
 
-    <!-- SLIDE 1 -->
+    <!-- 3D ARTWORK -->
     <section
       class="slide is-active"
       data-slide="0"
@@ -170,7 +188,7 @@
     </section>
 
 
-    <!-- SLIDE 2 -->
+    <!-- CLOSE UP -->
     <section
       class="slide closeup-slide"
       data-slide="1"
@@ -228,10 +246,12 @@
         const active =
           i === currentSlide;
 
+
         slide.classList.toggle(
           "is-active",
           active
         );
+
 
         slide.setAttribute(
           "aria-hidden",
@@ -247,12 +267,14 @@
     }
 
 
-    /* CLICK CLOSE-UP → RETURN TO 3D */
+    /* CLICK CLOSE-UP → BACK */
 
     closeupSlide.addEventListener(
       "click",
       () => {
+
         showSlide(0);
+
       }
     );
 
@@ -268,11 +290,14 @@
     const scene =
       new THREE.Scene();
 
+
     scene.background =
       new THREE.Color(0x482A34);
 
 
-    /* CAMERA */
+    /* ==================================================
+       CAMERA
+    ================================================== */
 
     const camera =
       new THREE.PerspectiveCamera(
@@ -282,28 +307,38 @@
         100
       );
 
+
     camera.position.set(
       0,
       0,
-      9.5
+      7
     );
 
 
-    /* RENDERER */
+    /* ==================================================
+       RENDERER
+    ================================================== */
 
     const renderer =
       new THREE.WebGLRenderer({
+
         antialias: true,
+
         alpha: false,
-        powerPreference: "high-performance"
+
+        powerPreference:
+          "high-performance"
+
       });
 
 
     renderer.outputColorSpace =
       THREE.SRGBColorSpace;
 
+
     renderer.shadowMap.enabled =
       true;
+
 
     renderer.shadowMap.type =
       THREE.PCFSoftShadowMap;
@@ -315,7 +350,7 @@
 
 
     /* ==================================================
-       LIGHT
+       LIGHTS
     ================================================== */
 
     const ambientLight =
@@ -323,6 +358,7 @@
         0xffffff,
         1.25
       );
+
 
     scene.add(
       ambientLight
@@ -425,7 +461,9 @@
       0.13;
 
 
-    /* BLACK 3D BODY */
+    /* ==================================================
+       3D BLACK BODY
+    ================================================== */
 
     const bodyMaterial =
       new THREE.MeshStandardMaterial({
@@ -434,7 +472,7 @@
 
         roughness: 0.92,
 
-        metalness: 0.0
+        metalness: 0
 
       });
 
@@ -443,9 +481,13 @@
       new THREE.Mesh(
 
         new THREE.BoxGeometry(
+
           artworkWidth,
+
           artworkHeight,
+
           depth
+
         ),
 
         bodyMaterial
@@ -455,6 +497,7 @@
 
     body.castShadow =
       true;
+
 
     body.receiveShadow =
       true;
@@ -466,7 +509,7 @@
 
 
     /* ==================================================
-       FRONT ARTWORK
+       FRONT IMAGE
     ================================================== */
 
     const textureLoader =
@@ -491,11 +534,14 @@
         texture.wrapS =
           THREE.ClampToEdgeWrapping;
 
+
         texture.wrapT =
           THREE.ClampToEdgeWrapping;
 
 
-        /* crop transparent border */
+        /*
+          Crop transparent edges.
+        */
 
         texture.repeat.set(
           0.96765,
@@ -512,8 +558,10 @@
         texture.minFilter =
           THREE.LinearFilter;
 
+
         texture.magFilter =
           THREE.LinearFilter;
+
 
         texture.generateMipmaps =
           false;
@@ -543,8 +591,11 @@
           new THREE.Mesh(
 
             new THREE.PlaneGeometry(
+
               artworkWidth,
+
               artworkHeight
+
             ),
 
             frontMaterial
@@ -577,11 +628,12 @@
 
 
     /* ==================================================
-       ROTATION
+       STARTING ROTATION
     ================================================== */
 
     let targetRotationY =
-      -0.16;
+      -0.15;
+
 
     let targetRotationX =
       -0.015;
@@ -589,6 +641,7 @@
 
     let currentRotationY =
       targetRotationY;
+
 
     let currentRotationX =
       targetRotationX;
@@ -610,7 +663,7 @@
 
           color: 0x000000,
 
-          opacity: 0.12
+          opacity: 0.11
 
         })
 
@@ -641,6 +694,7 @@
     let dragging =
       false;
 
+
     let moved =
       false;
 
@@ -648,12 +702,14 @@
     let startX =
       0;
 
+
     let startY =
       0;
 
 
     let lastX =
       0;
+
 
     let lastY =
       0;
@@ -666,6 +722,7 @@
         dragging =
           true;
 
+
         moved =
           false;
 
@@ -673,12 +730,14 @@
         startX =
           event.clientX;
 
+
         startY =
           event.clientY;
 
 
         lastX =
           event.clientX;
+
 
         lastY =
           event.clientY;
@@ -703,18 +762,23 @@
         const dx =
           event.clientX - lastX;
 
+
         const dy =
           event.clientY - lastY;
 
 
         if (
+
           Math.abs(
             event.clientX - startX
-          ) > 6 ||
+          ) > 6
+
+          ||
 
           Math.abs(
             event.clientY - startY
           ) > 6
+
         ) {
 
           moved =
@@ -725,6 +789,7 @@
 
         lastX =
           event.clientX;
+
 
         lastY =
           event.clientY;
@@ -740,17 +805,25 @@
 
         targetRotationY =
           THREE.MathUtils.clamp(
+
             targetRotationY,
+
             -0.58,
+
             0.58
+
           );
 
 
         targetRotationX =
           THREE.MathUtils.clamp(
+
             targetRotationX,
+
             -0.18,
+
             0.18
+
           );
 
       }
@@ -767,11 +840,16 @@
 
 
       if (
+
         event &&
+
         event.pointerId !== undefined &&
-        renderer.domElement.hasPointerCapture(
-          event.pointerId
-        )
+
+        renderer.domElement
+          .hasPointerCapture(
+            event.pointerId
+          )
+
       ) {
 
         renderer.domElement
@@ -782,11 +860,7 @@
       }
 
 
-      /*
-        If it was a click,
-        not a drag:
-        show close-up.
-      */
+      /* CLICK → CLOSE-UP */
 
       if (!moved) {
 
@@ -805,25 +879,10 @@
 
     renderer.domElement.addEventListener(
       "pointercancel",
-      (event) => {
+      () => {
 
         dragging =
           false;
-
-
-        if (
-          event.pointerId !== undefined &&
-          renderer.domElement.hasPointerCapture(
-            event.pointerId
-          )
-        ) {
-
-          renderer.domElement
-            .releasePointerCapture(
-              event.pointerId
-            );
-
-        }
 
       }
     );
@@ -874,7 +933,7 @@
 
 
     /* ==================================================
-       RESPONSIVE
+       AUTO FIT + LEFT POSITION
     ================================================== */
 
     function resize() {
@@ -893,8 +952,12 @@
         );
 
 
-      camera.aspect =
+      const aspect =
         w / h;
+
+
+      camera.aspect =
+        aspect;
 
 
       camera.updateProjectionMatrix();
@@ -908,30 +971,164 @@
 
 
       renderer.setPixelRatio(
+
         Math.min(
           window.devicePixelRatio,
           3
         )
+
       );
 
 
-      if (w < 700) {
+      /*
+        Narrow mode is used not only for phones,
+        but also for narrow Readymag iframe blocks.
+      */
 
-        artworkGroup.scale.setScalar(
-          0.84
+      const narrow =
+        w < 700 ||
+        aspect < 0.82;
+
+
+      const vFov =
+        THREE.MathUtils.degToRad(
+          camera.fov
         );
 
-        camera.position.z =
-          7.4;
+
+      /*
+        Add safety margins around rotated frame.
+      */
+
+      const safeHeight =
+        artworkHeight * 1.2;
+
+
+      const safeWidth =
+        artworkWidth * 1.25;
+
+
+      /*
+        On desktop artwork may occupy ~72% height.
+        On mobile ~68%.
+      */
+
+      const desiredHeight =
+        narrow
+          ? 0.68
+          : 0.72;
+
+
+      const desiredWidth =
+        narrow
+          ? 0.82
+          : 0.72;
+
+
+      const distanceByHeight =
+
+        (
+          safeHeight /
+          desiredHeight
+        )
+
+        /
+
+        (
+          2 *
+          Math.tan(
+            vFov / 2
+          )
+        );
+
+
+      const distanceByWidth =
+
+        (
+          safeWidth /
+          desiredWidth /
+          aspect
+        )
+
+        /
+
+        (
+          2 *
+          Math.tan(
+            vFov / 2
+          )
+        );
+
+
+      const distance =
+        Math.max(
+
+          distanceByHeight,
+
+          distanceByWidth
+
+        );
+
+
+      camera.position.z =
+        distance;
+
+
+      /*
+        Calculate visible world width
+        at artwork depth.
+      */
+
+      const visibleHeight =
+
+        2 *
+
+        Math.tan(
+          vFov / 2
+        )
+
+        *
+
+        distance;
+
+
+      const visibleWidth =
+        visibleHeight * aspect;
+
+
+      /*
+        DESKTOP:
+        object center ≈ 31% of viewport width.
+
+        MOBILE:
+        center artwork so it can never be cut.
+      */
+
+      if (narrow) {
+
+        artworkGroup.position.x =
+          0;
+
+
+        artworkGroup.position.y =
+          0;
+
+
+        counter.style.left =
+          "50%";
 
       } else {
 
-        artworkGroup.scale.setScalar(
-          1
-        );
+        artworkGroup.position.x =
+          -visibleWidth * 0.19;
 
-        camera.position.z =
-          7.5;
+
+        artworkGroup.position.y =
+          0;
+
+
+        counter.style.left =
+          "31%";
 
       }
 
